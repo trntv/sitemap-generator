@@ -94,11 +94,20 @@ func (s *Sitemap) realAdd(u *SitemapLoc, locN int, locBytes []byte) error {
 	}
 
 	if locBytes == nil {
-		output, err := url.Parse(s.Hostname)
+		output, err := url.Parse(u.Loc)
 		if err != nil {
 			return err
 		}
-		output.Path = path.Join(output.Path, u.Loc)
+		if (s.Hostname != "" && output.Host == "") {
+			host, err := url.Parse(s.Hostname)
+			if err != nil {
+				return err
+			}
+			output.Host = host.Host
+			if host.Scheme != "" {
+				output.Scheme = host.Scheme
+			}
+		}
 		u.Loc = output.String()
 		locN, locBytes, err = s.encodeToXML(u)
 		if err != nil {
